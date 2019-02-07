@@ -1,0 +1,40 @@
+#!groovy
+
+pipeline {
+    agent {
+        label "docker"
+    }
+    options {
+        timestamps()
+        timeout(time: 2, unit: 'HOURS')
+        buildDiscarder(logRotator(numToKeepStr: '30', artifactNumToKeepStr: '5'))
+        disableConcurrentBuilds()
+    }
+    parameters {
+        choice choices: ['debian', 'fedora'], description: 'Which image do you want to tag?', name: 'IMAGE_TO_TAG'
+        string defaultValue: 'latest', description: 'Which existing version to you want to tag?', name: 'IMAGE_VERSION_TO_TAG', trim: true
+        string defaultValue: '', description: 'Which tag should be set?', name: 'TAG_TO_SET', trim: true
+    }
+    stages {
+        stage('Tag Docker image') {
+            steps {
+                script {
+                    withDockerRegistry(credentialsId: 'Docker-Registry') {
+                        sh(
+                                script: '''
+                                    docker pull starwarsfan/cmake-builder-${IMAGE_TO_TAG}:${IMAGE_VERSION_TO_TAG}
+                                    docker tag  starwarsfan/cmake-builder-${IMAGE_TO_TAG}:${IMAGE_VERSION_TO_TAG} starwarsfan/cmake-builder-${IMAGE_TO_TAG}:${TAG_TO_SET}
+                                    docker push starwarsfan/cmake-builder-${IMAGE_TO_TAG}:${TAG_TO_SET}
+                                '''
+                        )
+                    }
+                }
+            }
+        }
+    }
+    post {
+        always {
+            sh "docker system prune --all --force"
+        }
+    }
+}
