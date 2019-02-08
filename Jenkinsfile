@@ -31,11 +31,6 @@ pipeline {
                             }
                         }
                     }
-                    post {
-                        always {
-                            sh "docker system prune --all --force"
-                        }
-                    }
                 }
                 stage('Fedora') {
                     agent {
@@ -46,11 +41,6 @@ pipeline {
                             withDockerRegistry(credentialsId: 'Docker-Registry') {
                                 sh "docker build -f Fedora/Dockerfile --rm -t starwarsfan/cmake-builder-fedora:latest ."
                             }
-                        }
-                    }
-                    post {
-                        always {
-                            sh "docker system prune --all --force"
                         }
                     }
                 }
@@ -71,11 +61,6 @@ pipeline {
                             }
                         }
                     }
-                    post {
-                        always {
-                            sh "docker system prune --all --force"
-                        }
-                    }
                 }
                 stage('Fedora') {
                     agent {
@@ -87,11 +72,6 @@ pipeline {
                                 sh "docker build -f Fedora/Dockerfile --rm -t starwarsfan/cmake-builder-fedora:latest ."
                                 sh "docker push starwarsfan/cmake-builder-fedora:latest"
                             }
-                        }
-                    }
-                    post {
-                        always {
-                            sh "docker system prune --all --force"
                         }
                     }
                 }
